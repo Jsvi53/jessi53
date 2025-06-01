@@ -1,0 +1,295 @@
+/* 粒子和特效样式 */
+
+/* 烟花容器 */
+.fireworks-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 30;
+    overflow: hidden;
+}
+
+/* 单个烟花 */
+.firework {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    animation: fireworkExplode 2s ease-out forwards;
+}
+
+/* 烟花颜色变体 */
+.firework.red {
+    background: radial-gradient(circle, #ff6b6b, #ff4757);
+    box-shadow: 0 0 20px #ff6b6b, 0 0 40px #ff4757;
+}
+
+.firework.blue {
+    background: radial-gradient(circle, #3742fa, #2f3542);
+    box-shadow: 0 0 20px #3742fa, 0 0 40px #2f3542;
+}
+
+.firework.green {
+    background: radial-gradient(circle, #2ed573, #1dd1a1);
+    box-shadow: 0 0 20px #2ed573, 0 0 40px #1dd1a1;
+}
+
+.firework.yellow {
+    background: radial-gradient(circle, #feca57, #ff9ff3);
+    box-shadow: 0 0 20px #feca57, 0 0 40px #ff9ff3;
+}
+
+.firework.purple {
+    background: radial-gradient(circle, #a55eea, #8c7ae6);
+    box-shadow: 0 0 20px #a55eea, 0 0 40px #8c7ae6;
+}
+
+/* 烟花粒子 */
+.firework-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    animation: fireworkParticle 1.5s ease-out forwards;
+}
+
+/* 彩带容器 */
+.confetti-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 25;
+    overflow: hidden;
+}
+
+/* 单个彩带 */
+.confetti {
+    position: absolute;
+    width: 10px;
+    height: 20px;
+    animation: confettiFall linear forwards;
+}
+
+/* 彩带形状变体 */
+.confetti.square {
+    width: 12px;
+    height: 12px;
+}
+
+.confetti.circle {
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+}
+
+.confetti.triangle {
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 12px solid;
+}
+
+/* 彩带颜色 */
+.confetti.color-1 { background-color: #ff6b6b; }
+.confetti.color-2 { background-color: #4ecdc4; }
+.confetti.color-3 { background-color: #45b7d1; }
+.confetti.color-4 { background-color: #f9ca24; }
+.confetti.color-5 { background-color: #f0932b; }
+.confetti.color-6 { background-color: #eb4d4b; }
+.confetti.color-7 { background-color: #6c5ce7; }
+.confetti.color-8 { background-color: #a29bfe; }
+.confetti.color-9 { background-color: #fd79a8; }
+.confetti.color-10 { background-color: #00b894; }
+
+/* 三角形彩带颜色 */
+.confetti.triangle.color-1 { border-bottom-color: #ff6b6b; }
+.confetti.triangle.color-2 { border-bottom-color: #4ecdc4; }
+.confetti.triangle.color-3 { border-bottom-color: #45b7d1; }
+.confetti.triangle.color-4 { border-bottom-color: #f9ca24; }
+.confetti.triangle.color-5 { border-bottom-color: #f0932b; }
+
+/* 星星效果 */
+.star {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: white;
+    border-radius: 50%;
+    animation: starTwinkle 2s ease-in-out infinite;
+}
+
+.star::before,
+.star::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: white;
+    border-radius: 50%;
+}
+
+.star::before {
+    transform: translate(-50%, -50%) rotate(45deg) scale(0.5, 2);
+}
+
+.star::after {
+    transform: translate(-50%, -50%) rotate(-45deg) scale(0.5, 2);
+}
+
+/* 气泡效果 */
+.bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
+    animation: bubbleFloat 4s ease-in-out infinite;
+}
+
+@keyframes bubbleFloat {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.7;
+    }
+    50% {
+        transform: translateY(-50px) scale(1.1);
+        opacity: 1;
+    }
+}
+
+/* 光效粒子 */
+.light-particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    animation: lightMove 3s linear infinite;
+}
+
+@keyframes lightMove {
+    0% {
+        transform: translate(0, 0) scale(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    90% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        transform: translate(var(--end-x), var(--end-y)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* 心形粒子 */
+.heart-particle {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    animation: heartFloat 3s ease-in-out infinite;
+}
+
+.heart-particle::before,
+.heart-particle::after {
+    content: '';
+    position: absolute;
+    width: 13px;
+    height: 20px;
+    background: #e74c3c;
+    border-radius: 10px 10px 0 0;
+    transform: rotate(-45deg);
+    transform-origin: 0 100%;
+}
+
+.heart-particle::after {
+    left: 9px;
+    transform: rotate(45deg);
+    transform-origin: 100% 100%;
+}
+
+@keyframes heartFloat {
+    0%, 100% {
+        transform: translateY(0) scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: translateY(-30px) scale(1);
+        opacity: 1;
+    }
+}
+
+/* 魔法粉尘效果 */
+.magic-dust {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #fff;
+    animation: magicDustFloat 2s ease-out forwards;
+}
+
+@keyframes magicDustFloat {
+    0% {
+        opacity: 0;
+        transform: scale(0) rotate(0deg);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1) rotate(90deg);
+    }
+    80% {
+        opacity: 1;
+        transform: scale(1) rotate(270deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0) rotate(360deg) translate(30px, -30px);
+    }
+}
+
+/* 霓虹效果 */
+.neon-glow {
+    text-shadow: 
+        0 0 5px currentColor,
+        0 0 10px currentColor,
+        0 0 20px currentColor,
+        0 0 40px currentColor;
+    animation: neonPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes neonPulse {
+    from {
+        text-shadow: 
+            0 0 5px currentColor,
+            0 0 10px currentColor,
+            0 0 20px currentColor,
+            0 0 40px currentColor;
+    }
+    to {
+        text-shadow: 
+            0 0 2px currentColor,
+            0 0 5px currentColor,
+            0 0 10px currentColor,
+            0 0 20px currentColor;
+    }
+}
+
+/* 粒子系统样式重写 */
+#particles-js canvas {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+} 

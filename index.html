@@ -1,41 +1,120 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
-    <meta charset="utf-8">
-    <title>恭喜，站点创建成功！</title>
-    <style>
-        .container {
-            width: 60%;
-            margin: 10% auto 0;
-            background-color: #f0f0f0;
-            padding: 2% 5%;
-            border-radius: 10px
-        }
-
-        ul {
-            padding-left: 20px;
-        }
-
-            ul li {
-                line-height: 2.3
-            }
-
-        a {
-            color: #20a53a
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ 现代化创意网站 - 探索无限可能 🌟</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/particles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <h1>恭喜, 站点创建成功！</h1>
-        <h3>这是默认index.html，本页面由系统自动生成</h3>
-        <ul>
-            <li>本页面在FTP根目录下的index.html</li>
-            <li>您可以修改、删除或覆盖本页面</li>
-            <li>FTP相关信息，请到“面板系统后台 > FTP” 查看</li>
-            <li>hello world!</li>
-            <li>test5</li>
-        </ul>
+    <!-- 背景视频 -->
+    <div class="video-background">
+        <video autoplay muted loop id="bgVideo">
+            <source src="assets/videos/modern-bg.mp4" type="video/mp4">
+        </video>
+        <div class="video-overlay"></div>
     </div>
+
+    <!-- 粒子系统容器 -->
+    <div id="particles-js"></div>
+    
+    <!-- 烟花容器 -->
+    <div class="fireworks-container" id="fireworks"></div>
+    
+    <!-- 彩带飘落 -->
+    <div class="confetti-container" id="confetti"></div>
+
+    <!-- 音乐控制 -->
+    <div class="music-control">
+        <button id="musicToggle" class="music-btn">
+            <span class="music-icon">🎵</span>
+            <span class="music-text">音乐</span>
+        </button>
+        <audio id="bgMusic" loop>
+            <source src="assets/audio/ambient-music.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-container">
+        <!-- 标题区域 -->
+        <header class="hero-section">
+            <div class="main-icon">🌟</div>
+            <h1 class="main-title">
+                <span class="title-line">创意</span>
+                <span class="title-line">无限</span>
+            </h1>
+            <div class="subtitle">Explore Infinite Creativity</div>
+            <div class="decorative-elements">
+                <span class="element element-1">✨</span>
+                <span class="element element-2">🌈</span>
+                <span class="element element-3">💫</span>
+            </div>
+        </header>
+
+        <!-- 互动按钮区 -->
+        <section class="action-section">
+            <button class="action-btn btn-primary" onclick="triggerFireworks()">
+                <span>🎆</span>
+                绚烂特效
+            </button>
+            <button class="action-btn btn-secondary" onclick="triggerConfetti()">
+                <span>🎊</span>
+                彩色雨滴
+            </button>
+            <button class="action-btn btn-accent" onclick="blowCandles()">
+                <span>✨</span>
+                魔法粉尘
+            </button>
+        </section>
+
+        <!-- 特色介绍区域 -->
+        <section class="features-section">
+            <div class="feature-card">
+                <h3>🎨 视觉艺术</h3>
+                <div class="feature-text" id="featureText">
+                    探索现代设计的无限可能，<br>
+                    让创意在视觉中绽放，<br>
+                    体验科技与艺术的完美融合，<br>
+                    创造属于你的独特世界！
+                </div>
+            </div>
+        </section>
+
+        <!-- 导航菜单 -->
+        <nav class="bottom-nav">
+            <a href="#portfolio" class="nav-item">
+                <span class="nav-icon">🎨</span>
+                <span class="nav-text">作品</span>
+            </a>
+            <a href="#about" class="nav-item">
+                <span class="nav-icon">🌟</span>
+                <span class="nav-text">关于</span>
+            </a>
+            <a href="#services" class="nav-item">
+                <span class="nav-icon">⚡</span>
+                <span class="nav-text">服务</span>
+            </a>
+            <a href="#contact" class="nav-item">
+                <span class="nav-icon">📞</span>
+                <span class="nav-text">联系</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- 魔法效果 -->
+    <div class="magic-effect" id="magicEffect">
+        <div class="magic-particles"></div>
+    </div>
+
+    <!-- JavaScript文件 -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="js/particles-config.js"></script>
+    <script src="js/animations.js"></script>
+    <script src="js/interactions.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>

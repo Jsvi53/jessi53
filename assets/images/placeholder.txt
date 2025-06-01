@@ -1,0 +1,37 @@
+# 图片文件目录
+
+这个目录用于存放项目相关的图片文件，如：
+- 背景图片
+- 图标文件
+- 装饰图片
+- 占位图片
+
+支持的格式：
+- JPG/JPEG
+- PNG
+- SVG
+- WebP
+- GIF
+
+使用说明：
+1. 将图片文件放置在此目录
+2. 在应用中通过相对路径引用：assets/images/your-image.jpg
+3. 建议单个文件大小不超过2MB
+4. 为不同屏幕密度提供多个版本
+
+示例：
+```html
+<img src="assets/images/background.jpg" alt="背景图片">
+```
+
+```css
+.background {
+    background-image: url('assets/images/background.jpg');
+}
+```
+
+优化建议：
+- 使用WebP格式以获得更好的压缩率
+- 提供不同尺寸的图片以适应响应式设计
+- 使用懒加载技术优化页面性能
+- 为图片添加适当的alt属性以提升无障碍性 

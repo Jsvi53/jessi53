@@ -1,0 +1,31 @@
+# 视频文件目录
+
+这个目录用于存放视频文件，如：
+- 背景视频
+- 动画演示
+- 教程视频
+
+支持的格式：
+- MP4
+- WebM
+- AVI
+- MOV
+
+使用说明：
+1. 将视频文件放置在此目录
+2. 在应用中通过相对路径引用：assets/videos/your-video.mp4
+3. 建议文件大小不超过20MB以保证加载速度
+4. 推荐分辨率：1920x1080或更低
+
+示例：
+```html
+<video autoplay loop muted>
+    <source src="assets/videos/background.mp4" type="video/mp4">
+    您的浏览器不支持视频播放
+</video>
+```
+
+优化建议：
+- 使用H.264编码以获得最佳兼容性
+- 为移动设备提供较低分辨率的版本
+- 考虑使用视频封面图片（poster属性） 

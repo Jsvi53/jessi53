@@ -116,9 +116,128 @@
                 </div>
                 <div class="form-group">
                     <label for="postContent">内容 *</label>
-                    <textarea id="postContent" placeholder="分享你想说的话..." required maxlength="1000"></textarea>
+                    <!-- 富文本编辑器工具栏 -->
+                    <div class="editor-toolbar">
+                        <div class="toolbar-group">
+                            <button type="button" class="toolbar-btn" data-command="undo" title="撤销">
+                                <i class="fas fa-undo"></i>
+                            </button>
+                            <button type="button" class="toolbar-btn" data-command="redo" title="重做">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="toolbar-group">
+                            <select class="toolbar-select" id="fontFamily" title="选择字体">
+                                <option value="inherit">默认字体</option>
+                                <option value="'KaiTi', '楷体', serif">楷书</option>
+                                <option value="'LiSu', '隶书', serif">隶书</option>
+                                <option value="'YouYuan', '幼圆', sans-serif">幼圆</option>
+                                <option value="'STXingkai', '华文行楷', cursive">行楷</option>
+                                <option value="'STKaiti', '华文楷体', serif">华文楷体</option>
+                                <option value="'Microsoft YaHei', '微软雅黑', sans-serif">微软雅黑</option>
+                                <option value="'SimSun', '宋体', serif">宋体</option>
+                                <option value="'SimHei', '黑体', sans-serif">黑体</option>
+                                <option value="'FangSong', '仿宋', serif">仿宋</option>
+                            </select>
+                            
+                            <select class="toolbar-select" id="fontSize" title="选择字号">
+                                <option value="12px">12px</option>
+                                <option value="14px">14px</option>
+                                <option value="16px" selected>16px</option>
+                                <option value="18px">18px</option>
+                                <option value="20px">20px</option>
+                                <option value="24px">24px</option>
+                                <option value="28px">28px</option>
+                                <option value="32px">32px</option>
+                                <option value="36px">36px</option>
+                                <option value="48px">48px</option>
+                            </select>
+                        </div>
+                        
+                        <div class="toolbar-group">
+                            <button type="button" class="toolbar-btn" data-command="bold" title="粗体">
+                                <i class="fas fa-bold"></i>
+                            </button>
+                            <button type="button" class="toolbar-btn" data-command="italic" title="斜体">
+                                <i class="fas fa-italic"></i>
+                            </button>
+                            <button type="button" class="toolbar-btn" data-command="underline" title="下划线">
+                                <i class="fas fa-underline"></i>
+                            </button>
+                            <button type="button" class="toolbar-btn" data-command="strikeThrough" title="删除线">
+                                <i class="fas fa-strikethrough"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="toolbar-group">
+                            <button type="button" class="toolbar-btn" data-command="justifyLeft" title="左对齐">
+                                <i class="fas fa-align-left"></i>
+                            </button>
+                            <button type="button" class="toolbar-btn" data-command="justifyCenter" title="居中对齐">
+                                <i class="fas fa-align-center"></i>
+                            </button>
+                            <button type="button" class="toolbar-btn" data-command="justifyRight" title="右对齐">
+                                <i class="fas fa-align-right"></i>
+                            </button>
+                            <button type="button" class="toolbar-btn" data-command="justifyFull" title="两端对齐">
+                                <i class="fas fa-align-justify"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="toolbar-group">
+                            <button type="button" class="toolbar-btn" data-command="insertOrderedList" title="有序列表">
+                                <i class="fas fa-list-ol"></i>
+                            </button>
+                            <button type="button" class="toolbar-btn" data-command="insertUnorderedList" title="无序列表">
+                                <i class="fas fa-list-ul"></i>
+                            </button>
+                            <button type="button" class="toolbar-btn" data-command="outdent" title="减少缩进">
+                                <i class="fas fa-outdent"></i>
+                            </button>
+                            <button type="button" class="toolbar-btn" data-command="indent" title="增加缩进">
+                                <i class="fas fa-indent"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="toolbar-group">
+                            <input type="color" class="color-picker" id="textColor" title="文字颜色" value="#000000">
+                            <input type="color" class="color-picker" id="backgroundColor" title="背景颜色" value="#ffffff">
+                        </div>
+                        
+                        <div class="toolbar-group">
+                            <button type="button" class="toolbar-btn" id="lineSpacingBtn" title="行间距">
+                                <i class="fas fa-text-height"></i>
+                            </button>
+                            <button type="button" class="toolbar-btn" id="paragraphSpacingBtn" title="段落间距">
+                                <i class="fas fa-paragraph"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 富文本编辑器 -->
+                    <div class="rich-editor" 
+                         id="postContent" 
+                         contenteditable="true" 
+                         placeholder="在这里输入你的公告内容..."
+                         data-placeholder="在这里输入你的公告内容..."></div>
+                    
+                    <!-- 间距控制面板 -->
+                    <div class="spacing-panel" id="spacingPanel" style="display: none;">
+                        <div class="spacing-control">
+                            <label for="lineHeight">行间距:</label>
+                            <input type="range" id="lineHeight" min="1" max="3" step="0.1" value="1.6">
+                            <span id="lineHeightValue">1.6</span>
+                        </div>
+                        <div class="spacing-control">
+                            <label for="paragraphSpacing">段落间距:</label>
+                            <input type="range" id="paragraphSpacing" min="0" max="2" step="0.1" value="1">
+                            <span id="paragraphSpacingValue">1em</span>
+                        </div>
+                    </div>
+                    
                     <div class="char-count">
-                        <span id="charCount">0</span>/1000
+                        <span id="charCount">0</span>/1000 字符
                     </div>
                 </div>
                 <div class="form-group">

@@ -1,0 +1,25 @@
+# 音频文件目录
+
+这个目录用于存放音频文件，如：
+- 背景音乐
+- 音效文件
+- 语音播报
+
+支持的格式：
+- MP3
+- WAV
+- OGG
+- M4A
+
+使用说明：
+1. 将音频文件放置在此目录
+2. 在应用中通过相对路径引用：assets/audio/your-file.mp3
+3. 建议文件大小不超过5MB以保证加载速度
+
+示例：
+```html
+<audio controls>
+    <source src="assets/audio/background-music.mp3" type="audio/mpeg">
+    您的浏览器不支持音频播放
+</audio>
+``` 

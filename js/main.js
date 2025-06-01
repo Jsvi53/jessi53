@@ -1,496 +1,498 @@
-// 主控制脚本 - 生日庆祝网站
+/**
+ * 公告板主应用程序
+ */
 
-// 全局配置
-const CONFIG = {
-    // 动画配置
-    animation: {
-        fireworkDuration: 3000,
-        confettiDuration: 3000,
-        particleCount: 80,
-        enableAutoEffects: true
-    },
-    
-    // 音乐配置
-    music: {
-        defaultVolume: 0.3,
-        fadeInDuration: 1000,
-        autoplay: false
-    },
-    
-    // 性能配置
-    performance: {
-        enableGPUAcceleration: true,
-        reduceMotionOnLowEnd: true,
-        maxParticles: 150
-    },
-    
-    // 主题配置
-    theme: {
-        primaryColor: '#ff6b6b',
-        secondaryColor: '#4ecdc4',
-        accentColor: '#f9ca24',
-        backgroundGradients: [
-            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-            'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
-        ]
-    }
-};
-
-// 主应用类
-class BirthdayApp {
+class AnnouncementBoard {
     constructor() {
+        this.version = '1.0.0';
         this.isInitialized = false;
-        this.effects = {};
-        this.performance = {
-            fps: 60,
-            frameCount: 0,
-            lastTime: performance.now()
-        };
+        this.debug = false;
         
         this.init();
     }
 
-    // 初始化应用
+    /**
+     * 初始化应用
+     */
     async init() {
         try {
-            console.log('🎂 初始化生日庆祝应用...');
+            console.log('开始初始化应用...');
+            this.showLoadingScreen();
             
-            // 检测设备性能
-            this.detectPerformance();
+            // 检查浏览器兼容性
+            console.log('检查浏览器兼容性...');
+            this.checkBrowserCompatibility();
             
-            // 预加载资源
-            await this.preloadAssets();
+            // 等待DOM加载完成
+            if (document.readyState === 'loading') {
+                console.log('等待DOM加载完成...');
+                await new Promise(resolve => {
+                    document.addEventListener('DOMContentLoaded', resolve);
+                });
+            }
+            console.log('DOM已加载完成');
             
-            // 初始化核心功能
-            this.initializeCore();
+            // 初始化各个模块
+            console.log('初始化各个模块...');
+            await this.initializeModules();
             
-            // 设置事件监听
-            this.setupEventListeners();
+            // 设置全局事件监听
+            console.log('设置全局事件监听...');
+            this.setupGlobalEvents();
             
-            // 启动性能监控
-            this.startPerformanceMonitoring();
+            // 加载示例数据（如果是首次使用）
+            console.log('加载示例数据...');
+            this.loadSampleDataIfNeeded();
             
-            // 显示欢迎动画
-            this.showWelcomeAnimation();
-            
+            // 标记为已初始化
             this.isInitialized = true;
-            console.log('✅ 应用初始化完成！');
+            
+            // 隐藏加载屏幕
+            console.log('隐藏加载屏幕...');
+            this.hideLoadingScreen();
+            
+            console.log(`📢 公告板应用已启动 v${this.version}`);
             
         } catch (error) {
-            console.error('❌ 应用初始化失败:', error);
-            this.showErrorMessage('应用加载失败，请刷新页面重试');
+            console.error('应用初始化失败:', error);
+            this.showErrorScreen(error);
         }
     }
 
-    // 检测设备性能
-    detectPerformance() {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        
-        // GPU 检测
-        if (gl) {
-            const renderer = gl.getParameter(gl.RENDERER);
-            console.log('GPU Renderer:', renderer);
-            
-            // 低端设备优化
-            if (renderer.toLowerCase().includes('software') || 
-                renderer.toLowerCase().includes('intel')) {
-                CONFIG.performance.reduceMotionOnLowEnd = true;
-                CONFIG.animation.particleCount = 30;
-            }
-        }
-
-        // 内存检测
-        if (navigator.deviceMemory && navigator.deviceMemory < 4) {
-            CONFIG.performance.maxParticles = 50;
-            CONFIG.animation.particleCount = 40;
-        }
-
-        // 移动设备检测
-        if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-            CONFIG.performance.maxParticles = 30;
-            CONFIG.animation.particleCount = 25;
-        }
-    }
-
-    // 预加载资源
-    async preloadAssets() {
-        const assets = [
-            // 可以在这里添加需要预加载的音频、图片等资源
-        ];
-
-        // 预加载音频
-        const audioPromises = [
-            this.preloadAudio('assets/audio/birthday-song.mp3'),
-            // 可以添加更多音频文件
-        ];
-
-        try {
-            await Promise.allSettled(audioPromises);
-            console.log('🎵 音频资源预加载完成');
-        } catch (error) {
-            console.warn('⚠️ 部分资源预加载失败:', error);
-        }
-    }
-
-    // 预加载音频
-    preloadAudio(src) {
-        return new Promise((resolve, reject) => {
-            const audio = new Audio();
-            audio.oncanplaythrough = () => resolve(audio);
-            audio.onerror = () => reject(new Error(`Failed to load ${src}`));
-            audio.src = src;
-            audio.load();
-        });
-    }
-
-    // 初始化核心功能
-    initializeCore() {
-        // 初始化主题
-        this.initializeTheme();
-        
-        // 初始化响应式设计
-        this.initializeResponsive();
-        
-        // 初始化可访问性
-        this.initializeAccessibility();
-        
-        // 初始化调试工具（开发模式）
-        if (this.isDevelopment()) {
-            this.initializeDebugTools();
-        }
-    }
-
-    // 初始化主题
-    initializeTheme() {
-        document.documentElement.style.setProperty('--primary-color', CONFIG.theme.primaryColor);
-        document.documentElement.style.setProperty('--secondary-color', CONFIG.theme.secondaryColor);
-        document.documentElement.style.setProperty('--accent-color', CONFIG.theme.accentColor);
-    }
-
-    // 初始化响应式设计
-    initializeResponsive() {
-        this.updateViewport();
-        window.addEventListener('resize', () => this.handleResize());
-        window.addEventListener('orientationchange', () => {
-            setTimeout(() => this.updateViewport(), 100);
-        });
-    }
-
-    // 更新视口
-    updateViewport() {
-        const vh = window.innerHeight * 0.01;
-        document.documentElement.style.setProperty('--vh', `${vh}px`);
-    }
-
-    // 处理窗口大小变化
-    handleResize() {
-        this.updateViewport();
-        
-        // 重新初始化粒子系统
-        if (window.pJSDom && window.pJSDom[0]) {
-            setTimeout(() => {
-                window.pJSDom[0].pJS.fn.vendors.resize();
-            }, 100);
-        }
-    }
-
-    // 初始化可访问性
-    initializeAccessibility() {
-        // 添加键盘导航支持
-        this.setupKeyboardNavigation();
-        
-        // 添加屏幕阅读器支持
-        this.setupScreenReaderSupport();
-        
-        // 检测用户的运动偏好
-        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            this.disableAnimations();
-        }
-    }
-
-    // 设置键盘导航
-    setupKeyboardNavigation() {
-        const focusableElements = document.querySelectorAll(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        
-        focusableElements.forEach(element => {
-            element.addEventListener('focus', () => {
-                element.style.outline = '2px solid #fff';
-                element.style.outlineOffset = '2px';
-            });
-            
-            element.addEventListener('blur', () => {
-                element.style.outline = '';
-                element.style.outlineOffset = '';
-            });
-        });
-    }
-
-    // 设置屏幕阅读器支持
-    setupScreenReaderSupport() {
-        // 添加 aria-labels
-        const musicBtn = document.getElementById('musicToggle');
-        if (musicBtn) {
-            musicBtn.setAttribute('aria-label', '播放生日音乐');
-        }
-
-        const actionBtns = document.querySelectorAll('.action-btn');
-        actionBtns.forEach((btn, index) => {
-            const labels = ['触发烟花效果', '播放彩带动画', '吹灭生日蜡烛'];
-            btn.setAttribute('aria-label', labels[index] || '特效按钮');
-        });
-    }
-
-    // 禁用动画（减弱运动）
-    disableAnimations() {
-        const style = document.createElement('style');
-        style.textContent = `
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
+    /**
+     * 显示加载屏幕
+     */
+    showLoadingScreen() {
+        const loader = document.createElement('div');
+        loader.id = 'appLoader';
+        loader.className = 'page-loader';
+        loader.innerHTML = `
+            <div class="loader-content">
+                <div class="loader-spinner"></div>
+                <p>正在加载公告板...</p>
+            </div>
         `;
-        document.head.appendChild(style);
+        document.body.appendChild(loader);
     }
 
-    // 设置事件监听器
-    setupEventListeners() {
+    /**
+     * 隐藏加载屏幕
+     */
+    hideLoadingScreen() {
+        const loader = document.getElementById('appLoader');
+        if (loader) {
+            loader.classList.add('hidden');
+            setTimeout(() => loader.remove(), 500);
+        }
+    }
+
+    /**
+     * 显示错误屏幕
+     */
+    showErrorScreen(error) {
+        const errorScreen = document.createElement('div');
+        errorScreen.className = 'error-screen';
+        errorScreen.innerHTML = `
+            <div class="error-content">
+                <h2>😔 应用启动失败</h2>
+                <p>抱歉，公告板无法正常启动</p>
+                <details>
+                    <summary>错误详情</summary>
+                    <pre>${error.message}</pre>
+                </details>
+                <button onclick="location.reload()">重新加载</button>
+            </div>
+        `;
+        document.body.appendChild(errorScreen);
+        this.hideLoadingScreen();
+    }
+
+    /**
+     * 检查浏览器兼容性
+     */
+    checkBrowserCompatibility() {
+        const requiredFeatures = [
+            'localStorage',
+            'fileReader',
+            'dragAndDrop'
+        ];
+
+        const unsupportedFeatures = requiredFeatures.filter(
+            feature => !Utils.Browser.supports(feature)
+        );
+
+        if (unsupportedFeatures.length > 0) {
+            console.warn('以下功能不受支持:', unsupportedFeatures);
+            
+            // 显示兼容性警告（非阻断性）
+            setTimeout(() => {
+                if (window.UI) {
+                    UI.showToast(
+                        '兼容性提醒', 
+                        '您的浏览器可能不支持某些功能，建议使用最新版本的现代浏览器', 
+                        'warning'
+                    );
+                }
+            }, 2000);
+        }
+    }
+
+    /**
+     * 初始化各个模块
+     */
+    async initializeModules() {
+        // 所有模块都是自动初始化的，这里只需要确保它们存在
+        const modules = ['Utils', 'AppStorage', 'UI'];
+        
+        for (const moduleName of modules) {
+            if (!window[moduleName]) {
+                throw new Error(`模块 ${moduleName} 未正确加载`);
+            }
+        }
+        
+        // 等待UI模块完全初始化
+        if (window.UI && !UI.isInitialized) {
+            await new Promise(resolve => {
+                const checkInit = () => {
+                    if (UI.isInitialized) {
+                        resolve();
+                    } else {
+                        setTimeout(checkInit, 50);
+                    }
+                };
+                checkInit();
+            });
+        }
+    }
+
+    /**
+     * 设置全局事件监听
+     */
+    setupGlobalEvents() {
         // 页面可见性变化
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
-                this.pauseAnimations();
+                this.onPageHidden();
             } else {
-                this.resumeAnimations();
+                this.onPageVisible();
             }
         });
 
-        // 页面卸载时清理
-        window.addEventListener('beforeunload', () => {
-            this.cleanup();
-        });
+        // 在线/离线状态
+        window.addEventListener('online', () => this.onOnline());
+        window.addEventListener('offline', () => this.onOffline());
 
-        // 错误处理
-        window.addEventListener('error', (e) => {
-            console.error('全局错误:', e.error);
-            this.handleError(e.error);
-        });
+        // 页面卸载前保存
+        window.addEventListener('beforeunload', (e) => this.onBeforeUnload(e));
 
-        // 未处理的 Promise 拒绝
-        window.addEventListener('unhandledrejection', (e) => {
-            console.error('未处理的 Promise 拒绝:', e.reason);
-            this.handleError(e.reason);
-        });
+        // 全局错误处理
+        window.addEventListener('error', (e) => this.onGlobalError(e));
+        window.addEventListener('unhandledrejection', (e) => this.onUnhandledRejection(e));
+
+        // 窗口大小变化
+        window.addEventListener('resize', Utils.DOM.throttle(() => {
+            this.onWindowResize();
+        }, 250));
     }
 
-    // 启动性能监控
-    startPerformanceMonitoring() {
-        const monitor = () => {
-            const now = performance.now();
-            const delta = now - this.performance.lastTime;
-            
-            if (delta >= 1000) {
-                this.performance.fps = Math.round((this.performance.frameCount * 1000) / delta);
-                this.performance.frameCount = 0;
-                this.performance.lastTime = now;
-                
-                // 性能警告
-                if (this.performance.fps < 30) {
-                    console.warn('⚠️ 低帧率检测到:', this.performance.fps, 'FPS');
-                    this.optimizePerformance();
+    /**
+     * 页面隐藏时的处理
+     */
+    onPageHidden() {
+        // 自动保存草稿等
+        console.log('页面隐藏，执行自动保存');
+    }
+
+    /**
+     * 页面可见时的处理
+     */
+    onPageVisible() {
+        // 刷新数据等
+        console.log('页面重新可见');
+        if (UI) {
+            UI.updateStats();
+        }
+    }
+
+    /**
+     * 网络连接恢复
+     */
+    onOnline() {
+        if (UI) {
+            UI.showToast('网络已连接', '您已重新连接到网络', 'success');
+        }
+    }
+
+    /**
+     * 网络连接断开
+     */
+    onOffline() {
+        if (UI) {
+            UI.showToast('网络已断开', '您当前处于离线状态，数据将保存在本地', 'warning');
+        }
+    }
+
+    /**
+     * 页面卸载前处理
+     */
+    onBeforeUnload(e) {
+        // 检查是否有未保存的内容
+        if (UI && UI.hasUnsavedChanges) {
+            e.preventDefault();
+            e.returnValue = '您有未保存的更改，确定要离开吗？';
+            return e.returnValue;
+        }
+    }
+
+    /**
+     * 全局错误处理
+     */
+    onGlobalError(e) {
+        console.error('全局错误:', e.error);
+        
+        if (UI) {
+            UI.showToast('系统错误', '发生了一个错误，但应用仍在运行', 'error');
+        }
+    }
+
+    /**
+     * 未处理的 Promise 拒绝
+     */
+    onUnhandledRejection(e) {
+        console.error('未处理的 Promise 拒绝:', e.reason);
+        e.preventDefault();
+    }
+
+    /**
+     * 窗口大小变化处理
+     */
+    onWindowResize() {
+        // 可以在这里处理响应式布局调整
+        console.log('窗口大小已改变');
+    }
+
+    /**
+     * 加载示例数据（首次使用）
+     */
+    loadSampleDataIfNeeded() {
+        const stats = AppStorage.getStats();
+        
+        if (stats.totalPosts === 0) {
+            // 添加一些示例公告
+            const samplePosts = [
+                {
+                    title: '欢迎使用公告板！',
+                    content: '这是你的第一条公告！你可以在这里发布文字、图片，记录生活中的点点滴滴。\n\n点击右上角的"发布新公告"按钮开始创建你的内容吧！',
+                    images: []
+                },
+                {
+                    title: '',
+                    content: '💡 小贴士：\n• 支持拖拽上传图片\n• 可以使用搜索功能快速找到内容\n• 支持明亮/暗色主题切换\n• 所有数据都保存在本地，隐私安全',
+                    images: []
                 }
+            ];
+
+            samplePosts.forEach(post => {
+                AppStorage.savePost(post);
+            });
+
+            if (UI) {
+                UI.updateStats();
+                UI.renderPosts();
+                
+                setTimeout(() => {
+                    UI.showToast(
+                        '欢迎使用！', 
+                        '我们为你添加了一些示例内容，快来探索吧！', 
+                        'success'
+                    );
+                }, 1000);
             }
+        }
+    }
+
+    /**
+     * 导出应用数据
+     */
+    exportData() {
+        try {
+            const data = AppStorage.exportData();
+            if (!data) {
+                throw new Error('没有可导出的数据');
+            }
+
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
             
-            this.performance.frameCount++;
-            requestAnimationFrame(monitor);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `announcement_board_backup_${Utils.Date.formatDate(new Date())}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            
+            if (UI) {
+                UI.showToast('导出成功', '数据已保存到下载文件夹', 'success');
+            }
+        } catch (error) {
+            console.error('导出失败:', error);
+            if (UI) {
+                UI.showToast('导出失败', error.message, 'error');
+            }
+        }
+    }
+
+    /**
+     * 导入应用数据
+     */
+    importData() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            try {
+                const text = await file.text();
+                const success = AppStorage.importData(text);
+                
+                if (success) {
+                    UI.updateStats();
+                    UI.renderPosts();
+                    UI.showToast('导入成功', '数据已成功导入', 'success');
+                } else {
+                    throw new Error('导入失败，请检查文件格式');
+                }
+            } catch (error) {
+                console.error('导入失败:', error);
+                UI.showToast('导入失败', error.message, 'error');
+            }
         };
         
-        requestAnimationFrame(monitor);
+        input.click();
     }
 
-    // 性能优化
-    optimizePerformance() {
-        // 减少粒子数量
-        if (CONFIG.animation.particleCount > 20) {
-            CONFIG.animation.particleCount -= 10;
-            changeParticleMode('calm');
+    /**
+     * 清空所有数据
+     */
+    clearAllData() {
+        if (confirm('确定要清空所有数据吗？此操作无法撤销。')) {
+            AppStorage.clearAllData();
+            UI.updateStats();
+            UI.renderPosts();
+            UI.showToast('数据已清空', '所有公告已被删除', 'success');
         }
+    }
+
+    /**
+     * 获取应用信息
+     */
+    getAppInfo() {
+        const stats = AppStorage.getStats();
+        const storageInfo = AppStorage.getStorageInfo();
+        const deviceInfo = Utils.Browser.getDeviceInfo();
         
-        // 禁用一些特效
-        CONFIG.animation.enableAutoEffects = false;
+        return {
+            version: this.version,
+            stats,
+            storage: storageInfo,
+            device: deviceInfo,
+            buildTime: new Date().toISOString()
+        };
     }
 
-    // 显示欢迎动画
-    showWelcomeAnimation() {
-        // 延迟显示主内容
-        setTimeout(() => {
-            const mainContainer = document.querySelector('.main-container');
-            if (mainContainer) {
-                mainContainer.style.opacity = '1';
-                mainContainer.style.transform = 'translateY(0)';
-            }
+    /**
+     * 切换调试模式
+     */
+    toggleDebugMode() {
+        this.debug = !this.debug;
+        console.log(`调试模式: ${this.debug ? '开启' : '关闭'}`);
+        
+        if (this.debug) {
+            // 在调试模式下暴露一些有用的全局函数
+            window.DEBUG = {
+                app: this,
+                exportData: () => this.exportData(),
+                importData: () => this.importData(),
+                clearData: () => this.clearAllData(),
+                getInfo: () => this.getAppInfo(),
+                storage: AppStorage,
+                ui: UI,
+                utils: Utils
+            };
             
-            // 启动庆祝模式
-            if (CONFIG.animation.enableAutoEffects) {
-                this.startCelebrationMode();
-            }
-        }, 500);
-    }
-
-    // 启动庆祝模式
-    startCelebrationMode() {
-        setTimeout(() => {
-            changeParticleMode('celebration');
-        }, 1000);
-
-        // 自动特效展示
-        setTimeout(() => {
-            if (window.AnimationEffects) {
-                window.AnimationEffects.hearts.create(5);
-            }
-        }, 2000);
-
-        setTimeout(() => {
-            if (window.AnimationEffects) {
-                window.AnimationEffects.bubbles.createBubbles(8);
-            }
-        }, 4000);
-    }
-
-    // 暂停动画
-    pauseAnimations() {
-        if (window.AnimationEffects) {
-            window.AnimationEffects.fireworks.stop();
+            console.log('调试工具已暴露到 window.DEBUG');
+        } else {
+            delete window.DEBUG;
         }
     }
 
-    // 恢复动画
-    resumeAnimations() {
-        // 恢复粒子效果
-        if (window.pJSDom && window.pJSDom[0]) {
-            window.pJSDom[0].pJS.fn.modes.pushParticles(10);
-        }
-    }
-
-    // 初始化调试工具
-    initializeDebugTools() {
-        // 添加调试控制台
-        window.DEBUG = {
-            config: CONFIG,
-            app: this,
-            triggerFireworks: () => triggerFireworks(),
-            triggerConfetti: () => triggerConfetti(),
-            blowCandles: () => blowCandles(),
-            changeTheme: (gradient) => {
-                document.body.style.background = gradient;
+    /**
+     * 应用健康检查
+     */
+    healthCheck() {
+        const checks = [
+            {
+                name: '存储功能',
+                test: () => Utils.Browser.supports('localStorage'),
+                fix: '请使用支持 localStorage 的现代浏览器'
             },
-            getPerformance: () => this.performance
-        };
-        
-        console.log('🛠️ 调试工具已启用，使用 DEBUG 对象访问');
-        console.log('可用命令:', Object.keys(window.DEBUG));
-    }
+            {
+                name: '文件读取',
+                test: () => Utils.Browser.supports('fileReader'),
+                fix: '请升级浏览器以支持文件上传功能'
+            },
+            {
+                name: '数据完整性',
+                test: () => {
+                    try {
+                        const data = AppStorage.getAllData();
+                        return data && typeof data === 'object';
+                    } catch {
+                        return false;
+                    }
+                },
+                fix: '尝试清除浏览器数据并重新加载页面'
+            }
+        ];
 
-    // 错误处理
-    handleError(error) {
-        // 这里可以添加错误上报逻辑
-        console.error('应用错误:', error);
-    }
+        const results = checks.map(check => ({
+            name: check.name,
+            passed: check.test(),
+            fix: check.fix
+        }));
 
-    // 显示错误消息
-    showErrorMessage(message) {
-        const errorDiv = document.createElement('div');
-        errorDiv.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 0, 0, 0.9);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            z-index: 10000;
-            font-size: 16px;
-            text-align: center;
-        `;
-        errorDiv.textContent = message;
-        document.body.appendChild(errorDiv);
+        const failed = results.filter(r => !r.passed);
         
-        setTimeout(() => errorDiv.remove(), 5000);
-    }
-
-    // 检测是否为开发模式
-    isDevelopment() {
-        return window.location.hostname === 'localhost' || 
-               window.location.hostname === '127.0.0.1' ||
-               window.location.search.includes('debug=true');
-    }
-
-    // 清理资源
-    cleanup() {
-        // 停止动画
-        this.pauseAnimations();
-        
-        // 清理事件监听器
-        // 这里可以添加具体的清理逻辑
-        
-        console.log('🧹 资源清理完成');
+        if (failed.length === 0) {
+            console.log('✅ 所有健康检查通过');
+            return { healthy: true, results };
+        } else {
+            console.warn('⚠️  发现问题:', failed);
+            return { healthy: false, results, issues: failed };
+        }
     }
 }
 
-// 全局工具函数
-window.Utils = {
-    // 随机数生成
-    random: (min, max) => Math.random() * (max - min) + min,
-    
-    // 颜色工具
-    randomColor: () => {
-        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7'];
-        return colors[Math.floor(Math.random() * colors.length)];
-    },
-    
-    // 延迟执行
-    delay: (ms) => new Promise(resolve => setTimeout(resolve, ms)),
-    
-    // 节流函数
-    throttle: (func, limit) => {
-        let inThrottle;
-        return function() {
-            const args = arguments;
-            const context = this;
-            if (!inThrottle) {
-                func.apply(context, args);
-                inThrottle = true;
-                setTimeout(() => inThrottle = false, limit);
-            }
-        };
-    },
-    
-    // 防抖函数
-    debounce: (func, wait) => {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-};
+// 启动应用
+const app = new AnnouncementBoard();
 
-// 应用启动
-let app;
-document.addEventListener('DOMContentLoaded', function() {
-    app = new BirthdayApp();
-    window.BirthdayApp = app;
-});
+// 暴露到全局（用于控制台调试）
+window.App = app;
 
-// 导出全局访问
-window.CONFIG = CONFIG; 
+// 开发模式下的快捷键
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    document.addEventListener('keydown', (e) => {
+        // Ctrl+Shift+D 开启调试模式
+        if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+            app.toggleDebugMode();
+        }
+        
+        // Ctrl+Shift+H 健康检查
+        if (e.ctrlKey && e.shiftKey && e.key === 'H') {
+            console.log('健康检查结果:', app.healthCheck());
+        }
+    });
+} 

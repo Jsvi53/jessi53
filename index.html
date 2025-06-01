@@ -3,118 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✨ 现代化创意网站 - 探索无限可能 🌟</title>
+    <title>📢 创意公告板 - 分享你的想法</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/particles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- 背景视频 -->
-    <div class="video-background">
-        <video autoplay muted loop id="bgVideo">
-            <source src="assets/videos/modern-bg.mp4" type="video/mp4">
-        </video>
-        <div class="video-overlay"></div>
+    <!-- 背景装饰 -->
+    <div class="bg-decoration">
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+        </div>
     </div>
 
-    <!-- 粒子系统容器 -->
-    <div id="particles-js"></div>
-    
-    <!-- 烟花容器 -->
-    <div class="fireworks-container" id="fireworks"></div>
-    
-    <!-- 彩带飘落 -->
-    <div class="confetti-container" id="confetti"></div>
-
-    <!-- 音乐控制 -->
-    <div class="music-control">
-        <button id="musicToggle" class="music-btn">
-            <span class="music-icon">🎵</span>
-            <span class="music-text">音乐</span>
-        </button>
-        <audio id="bgMusic" loop>
-            <source src="assets/audio/ambient-music.mp3" type="audio/mpeg">
-        </audio>
-    </div>
+    <!-- 顶部导航 -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-bullhorn"></i>
+                <span>创意公告板</span>
+            </div>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" title="切换主题">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="new-post-btn" id="newPostBtn">
+                    <i class="fas fa-plus"></i>
+                    <span>发布新公告</span>
+                </button>
+            </div>
+        </div>
+    </nav>
 
     <!-- 主内容区 -->
-    <div class="main-container">
-        <!-- 标题区域 -->
-        <header class="hero-section">
-            <div class="main-icon">🌟</div>
-            <h1 class="main-title">
-                <span class="title-line">创意</span>
-                <span class="title-line">无限</span>
-            </h1>
-            <div class="subtitle">Explore Infinite Creativity</div>
-            <div class="decorative-elements">
-                <span class="element element-1">✨</span>
-                <span class="element element-2">🌈</span>
-                <span class="element element-3">💫</span>
+    <main class="main-content">
+        <div class="container">
+            <!-- 欢迎区域 -->
+            <section class="welcome-section">
+                <h1 class="welcome-title">
+                    <span class="title-icon">📢</span>
+                    欢迎来到创意公告板
+                </h1>
+                <p class="welcome-subtitle">分享你的想法，记录美好时刻</p>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalPosts">0</span>
+                        <span class="stat-label">总公告</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="todayPosts">0</span>
+                        <span class="stat-label">今日发布</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 搜索和筛选 -->
+            <section class="search-section">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索公告内容..." id="searchInput">
+                </div>
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="all">
+                        <i class="fas fa-list"></i>
+                        全部
+                    </button>
+                    <button class="filter-tab" data-filter="today">
+                        <i class="fas fa-calendar-day"></i>
+                        今天
+                    </button>
+                    <button class="filter-tab" data-filter="with-images">
+                        <i class="fas fa-image"></i>
+                        有图片
+                    </button>
+                </div>
+            </section>
+
+            <!-- 公告列表 -->
+            <section class="posts-section">
+                <div class="posts-container" id="postsContainer">
+                    <!-- 公告项目将通过JavaScript动态生成 -->
+                </div>
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">📝</div>
+                    <h3>还没有公告</h3>
+                    <p>点击上方按钮发布你的第一条公告吧！</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 发布公告模态框 -->
+    <div class="modal-overlay" id="postModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-edit"></i>
+                    发布新公告
+                </h2>
+                <button class="close-btn" id="closeModal" title="关闭">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-        </header>
+            <form class="post-form" id="postForm">
+                <div class="form-group">
+                    <label for="postTitle">标题</label>
+                    <input type="text" id="postTitle" placeholder="输入公告标题（可选）" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="postContent">内容 *</label>
+                    <textarea id="postContent" placeholder="分享你想说的话..." required maxlength="1000"></textarea>
+                    <div class="char-count">
+                        <span id="charCount">0</span>/1000
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="postImages">图片</label>
+                    <div class="image-upload-area" id="imageUpload">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>拖拽图片到这里或点击上传</p>
+                        <input type="file" id="postImages" accept="image/*" multiple hidden>
+                    </div>
+                    <div class="image-preview" id="imagePreview"></div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">取消</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        发布公告
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        <!-- 互动按钮区 -->
-        <section class="action-section">
-            <button class="action-btn btn-primary" onclick="triggerFireworks()">
-                <span>🎆</span>
-                绚烂特效
+    <!-- 图片查看器 -->
+    <div class="image-viewer-overlay" id="imageViewer">
+        <div class="image-viewer">
+            <button class="viewer-close" id="viewerClose" title="关闭">
+                <i class="fas fa-times"></i>
             </button>
-            <button class="action-btn btn-secondary" onclick="triggerConfetti()">
-                <span>🎊</span>
-                彩色雨滴
-            </button>
-            <button class="action-btn btn-accent" onclick="blowCandles()">
-                <span>✨</span>
-                魔法粉尘
-            </button>
-        </section>
+            <img id="viewerImage" alt="查看图片">
+            <div class="viewer-controls">
+                <button class="viewer-btn" id="prevImage" title="上一张">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="viewer-btn" id="nextImage" title="下一张">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 
-        <!-- 特色介绍区域 -->
-        <section class="features-section">
-            <div class="feature-card">
-                <h3>🎨 视觉艺术</h3>
-                <div class="feature-text" id="featureText">
-                    探索现代设计的无限可能，<br>
-                    让创意在视觉中绽放，<br>
-                    体验科技与艺术的完美融合，<br>
-                    创造属于你的独特世界！
+    <!-- 确认删除模态框 -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal delete-modal">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-exclamation-triangle"></i>
+                    确认删除
+                </h2>
+            </div>
+            <div class="modal-content">
+                <p>你确定要删除这条公告吗？此操作无法撤销。</p>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelDelete">取消</button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">
+                        <i class="fas fa-trash"></i>
+                        删除
+                    </button>
                 </div>
             </div>
-        </section>
-
-        <!-- 导航菜单 -->
-        <nav class="bottom-nav">
-            <a href="#portfolio" class="nav-item">
-                <span class="nav-icon">🎨</span>
-                <span class="nav-text">作品</span>
-            </a>
-            <a href="#about" class="nav-item">
-                <span class="nav-icon">🌟</span>
-                <span class="nav-text">关于</span>
-            </a>
-            <a href="#services" class="nav-item">
-                <span class="nav-icon">⚡</span>
-                <span class="nav-text">服务</span>
-            </a>
-            <a href="#contact" class="nav-item">
-                <span class="nav-icon">📞</span>
-                <span class="nav-text">联系</span>
-            </a>
-        </nav>
+        </div>
     </div>
 
-    <!-- 魔法效果 -->
-    <div class="magic-effect" id="magicEffect">
-        <div class="magic-particles"></div>
-    </div>
+    <!-- Toast 通知 -->
+    <div class="toast-container" id="toastContainer"></div>
 
-    <!-- JavaScript文件 -->
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script src="js/particles-config.js"></script>
-    <script src="js/animations.js"></script>
-    <script src="js/interactions.js"></script>
+    <!-- JavaScript -->
+    <script src="js/utils.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
     <script src="js/main.js"></script>
+    
+    <!-- 备用初始化脚本 -->
+    <script>
+        // 检测并修复加载问题
+        window.addEventListener('load', function() {
+            console.log('页面完全加载完成');
+            
+            // 如果5秒后仍然有加载屏幕，强制移除
+            setTimeout(function() {
+                const loader = document.getElementById('appLoader');
+                if (loader && loader.style.opacity !== '0') {
+                    console.warn('检测到加载超时，强制移除加载屏幕');
+                    loader.remove();
+                    
+                    // 检查关键元素是否存在
+                    const postsContainer = document.getElementById('postsContainer');
+                    const emptyState = document.getElementById('emptyState');
+                    
+                    if (postsContainer && emptyState) {
+                        // 显示空状态
+                        emptyState.style.display = 'block';
+                        console.log('已显示空状态，应用应该可以正常使用了');
+                    }
+                }
+            }, 5000);
+        });
+        
+        // 调试信息
+        console.log('脚本加载检查:');
+        console.log('- Utils:', typeof window.Utils);
+        console.log('- AppStorage:', typeof window.AppStorage);
+        console.log('- UI:', typeof window.UI);
+        console.log('- App:', typeof window.App);
+    </script>
 </body>
 </html>

@@ -12,18 +12,58 @@ class UIManager {
         this.viewerImages = [];
         this.isInitialized = false;
         
-        this.init();
+        // 延迟初始化，等待DOM和存储准备好
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.init());
+        } else {
+            this.init();
+        }
     }
 
     /**
      * 初始化UI
      */
     init() {
-        this.cacheElements();
-        this.bindEvents();
-        this.initTheme();
+        try {
+            this.cacheElements();
+            this.bindEvents();
+            this.initRichEditor();
+            
+            // 延迟初始化需要存储的功能
+            this.waitForStorageAndInit();
+            
+            this.isInitialized = true;
+            console.log('✅ UI管理器初始化完成');
+        } catch (error) {
+            console.error('❌ UI初始化失败:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 等待存储准备好后初始化相关功能
+     */
+    async waitForStorageAndInit() {
+        // 等待存储管理器准备好
+        let retries = 0;
+        const maxRetries = 50; // 最多等待5秒
+        
+        while (retries < maxRetries) {
+            if (window.CurrentStorage || window.AppStorage) {
+                // 存储已准备好，初始化依赖存储的功能
+                this.initTheme();
+                this.renderInitialContent();
+                return;
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 100));
+            retries++;
+        }
+        
+        // 如果等待超时，使用默认设置
+        console.warn('⚠️ 存储初始化超时，使用默认设置');
+        this.setTheme('light'); // 使用默认主题
         this.renderInitialContent();
-        this.isInitialized = true;
     }
 
     /**
@@ -109,8 +149,12 @@ class UIManager {
         // 表单提交
         this.elements.postForm?.addEventListener('submit', (e) => this.handleFormSubmit(e));
         
-        // 字符计数
+        // 字符计数 - 改为监听富文本编辑器
         this.elements.postContent?.addEventListener('input', () => this.updateCharCount());
+        this.elements.postContent?.addEventListener('keyup', () => this.updateCharCount());
+        this.elements.postContent?.addEventListener('paste', () => {
+            setTimeout(() => this.updateCharCount(), 10);
+        });
         
         // 图片上传
         this.elements.imageUpload?.addEventListener('click', () => this.elements.postImages?.click());
@@ -142,38 +186,157 @@ class UIManager {
      * 初始化主题
      */
     initTheme() {
-        const savedTheme = AppStorage.getSettings().theme;
+        const currentStorage = window.CurrentStorage || window.AppStorage;
+        const savedTheme = currentStorage.getSettings().theme;
         this.setTheme(savedTheme);
+    }
+
+    /**
+     * 初始化富文本编辑器
+     */
+    initRichEditor() {
+        // 工具栏按钮事件
+        document.querySelectorAll('.toolbar-btn[data-command]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const command = btn.dataset.command;
+                this.executeEditorCommand(command);
+                this.updateCharCount();
+            });
+        });
+
+        // 字体选择
+        const fontFamily = document.getElementById('fontFamily');
+        const fontSize = document.getElementById('fontSize');
+        
+        fontFamily?.addEventListener('change', (e) => {
+            this.executeEditorCommand('fontName', e.target.value);
+        });
+        
+        fontSize?.addEventListener('change', (e) => {
+            this.executeEditorCommand('fontSize', '3'); // HTML fontSize 使用1-7
+            if (this.elements.postContent) {
+                // 使用CSS方式设置字体大小
+                document.execCommand('fontSize', false, '3');
+                const fontElements = this.elements.postContent.querySelectorAll('font[size="3"]');
+                fontElements.forEach(el => {
+                    el.removeAttribute('size');
+                    el.style.fontSize = e.target.value;
+                });
+            }
+        });
+
+        // 颜色选择
+        const textColor = document.getElementById('textColor');
+        const backgroundColor = document.getElementById('backgroundColor');
+        
+        textColor?.addEventListener('change', (e) => {
+            this.executeEditorCommand('foreColor', e.target.value);
+        });
+        
+        backgroundColor?.addEventListener('change', (e) => {
+            this.executeEditorCommand('backColor', e.target.value);
+        });
+
+        // 间距控制
+        const lineSpacingBtn = document.getElementById('lineSpacingBtn');
+        const paragraphSpacingBtn = document.getElementById('paragraphSpacingBtn');
+        const spacingPanel = document.getElementById('spacingPanel');
+        
+        lineSpacingBtn?.addEventListener('click', () => {
+            spacingPanel.style.display = spacingPanel.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // 行间距控制
+        const lineHeight = document.getElementById('lineHeight');
+        const lineHeightValue = document.getElementById('lineHeightValue');
+        
+        lineHeight?.addEventListener('input', (e) => {
+            const value = e.target.value;
+            lineHeightValue.textContent = value;
+            if (this.elements.postContent) {
+                this.elements.postContent.style.lineHeight = value;
+            }
+        });
+
+        // 段落间距控制
+        const paragraphSpacing = document.getElementById('paragraphSpacing');
+        const paragraphSpacingValue = document.getElementById('paragraphSpacingValue');
+        
+        paragraphSpacing?.addEventListener('input', (e) => {
+            const value = e.target.value;
+            paragraphSpacingValue.textContent = value + 'em';
+            if (this.elements.postContent) {
+                this.elements.postContent.style.setProperty('--paragraph-spacing', value + 'em');
+            }
+        });
+    }
+
+    /**
+     * 执行编辑器命令
+     */
+    executeEditorCommand(command, value = null) {
+        this.elements.postContent?.focus();
+        document.execCommand(command, false, value);
+        
+        // 更新工具栏按钮状态
+        this.updateToolbarState();
+    }
+
+    /**
+     * 更新工具栏按钮状态
+     */
+    updateToolbarState() {
+        const commands = ['bold', 'italic', 'underline', 'strikeThrough'];
+        
+        commands.forEach(command => {
+            const btn = document.querySelector(`[data-command="${command}"]`);
+            if (btn) {
+                const isActive = document.queryCommandState(command);
+                btn.classList.toggle('active', isActive);
+            }
+        });
     }
 
     /**
      * 渲染初始内容
      */
     renderInitialContent() {
-        this.updateStats();
-        this.renderPosts();
+        // 安全检查存储是否可用
+        if (window.CurrentStorage || window.AppStorage) {
+            this.updateStats();
+            this.renderPosts();
+        } else {
+            // 显示空状态
+            this.displayPosts([]);
+        }
     }
 
     /**
      * 切换主题
      */
     toggleTheme() {
-        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
         this.setTheme(newTheme);
-        AppStorage.saveSetting('theme', newTheme);
-        this.showToast('主题已切换', `已切换到${newTheme === 'light' ? '明亮' : '暗色'}模式`, 'success');
     }
 
     /**
      * 设置主题
      */
-    setTheme(theme) {
+    setTheme(theme = 'light') {
         document.documentElement.setAttribute('data-theme', theme);
+        
         const icon = this.elements.themeToggle?.querySelector('i');
         if (icon) {
-            icon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
         }
+        
+        // 保存主题设置
+        const currentStorage = window.CurrentStorage || window.AppStorage;
+        const settings = currentStorage.getSettings();
+        settings.theme = theme;
+        currentStorage.saveSettings(settings);
     }
 
     /**
@@ -193,52 +356,59 @@ class UIManager {
     /**
      * 更新统计数据
      */
-    updateStats() {
-        const stats = AppStorage.getStats();
-        
-        if (this.elements.totalPosts) {
-            this.elements.totalPosts.textContent = stats.totalPosts;
-        }
-        
-        if (this.elements.todayPosts) {
-            this.elements.todayPosts.textContent = stats.todayPosts;
+    async updateStats() {
+        try {
+            const currentStorage = window.CurrentStorage || window.AppStorage;
+            if (!currentStorage) {
+                // 如果存储不可用，显示默认值
+                if (this.elements.totalPosts) {
+                    this.elements.totalPosts.textContent = '0';
+                }
+                if (this.elements.todayPosts) {
+                    this.elements.todayPosts.textContent = '0';
+                }
+                return;
+            }
+
+            const stats = await currentStorage.getStats();
+            
+            if (this.elements.totalPosts) {
+                this.elements.totalPosts.textContent = stats.totalPosts || 0;
+            }
+            
+            if (this.elements.todayPosts) {
+                this.elements.todayPosts.textContent = stats.todayPosts || 0;
+            }
+        } catch (error) {
+            console.error('更新统计信息失败:', error);
+            // 显示默认值
+            if (this.elements.totalPosts) {
+                this.elements.totalPosts.textContent = '0';
+            }
+            if (this.elements.todayPosts) {
+                this.elements.todayPosts.textContent = '0';
+            }
         }
     }
 
     /**
      * 渲染公告列表
      */
-    renderPosts() {
-        let posts = [];
-        
-        // 根据搜索和筛选获取公告
-        if (this.currentSearchQuery) {
-            posts = AppStorage.searchPosts(this.currentSearchQuery);
-        } else {
-            posts = AppStorage.getPostsByFilter(this.currentFilter);
+    async renderPosts() {
+        try {
+            const currentStorage = window.CurrentStorage || window.AppStorage;
+            if (!currentStorage) {
+                // 如果存储不可用，显示空列表
+                this.displayPosts([]);
+                return;
+            }
+
+            const posts = await currentStorage.getPosts();
+            this.displayPosts(posts);
+        } catch (error) {
+            console.error('渲染公告失败:', error);
+            this.displayPosts([]);
         }
-        
-        const container = this.elements.postsContainer;
-        const emptyState = this.elements.emptyState;
-        
-        if (!container) return;
-        
-        // 清空容器
-        container.innerHTML = '';
-        
-        if (posts.length === 0) {
-            emptyState?.classList.remove('hidden');
-            return;
-        }
-        
-        emptyState?.classList.add('hidden');
-        
-        // 渲染公告卡片
-        posts.forEach((post, index) => {
-            const postElement = this.createPostElement(post);
-            postElement.style.animationDelay = `${index * 0.1}s`;
-            container.appendChild(postElement);
-        });
     }
 
     /**
@@ -277,13 +447,18 @@ class UIManager {
         header.appendChild(actions);
         
         const content = document.createElement('div');
-        content.className = 'post-content';
+        content.className = 'post-content rich-content';
         
-        // 高亮搜索文本
-        const highlightedContent = this.currentSearchQuery 
-            ? Utils.String.highlightText(post.content, this.currentSearchQuery)
-            : Utils.String.escapeHtml(post.content);
-        content.innerHTML = highlightedContent;
+        // 直接使用HTML内容，不转义
+        if (this.currentSearchQuery) {
+            // 如果有搜索查询，先获取纯文本进行高亮，然后设置HTML
+            const textContent = this.getTextFromHTML(post.content);
+            const highlightedText = Utils.String.highlightText(textContent, this.currentSearchQuery);
+            content.innerHTML = highlightedText;
+        } else {
+            // 直接显示富文本HTML内容
+            content.innerHTML = post.content;
+        }
         
         article.appendChild(header);
         article.appendChild(content);
@@ -327,6 +502,107 @@ class UIManager {
     }
 
     /**
+     * 从HTML中提取纯文本
+     */
+    getTextFromHTML(html) {
+        const div = document.createElement('div');
+        div.innerHTML = html;
+        return div.textContent || div.innerText || '';
+    }
+
+    /**
+     * 显示公告列表
+     */
+    displayPosts(posts) {
+        const container = this.elements.postsContainer;
+        const emptyState = this.elements.emptyState;
+        
+        if (!container) {
+            console.warn('公告容器未找到');
+            return;
+        }
+
+        // 清空容器
+        container.innerHTML = '';
+
+        if (!posts || posts.length === 0) {
+            // 显示空状态
+            container.style.display = 'none';
+            if (emptyState) {
+                emptyState.style.display = 'block';
+            }
+            return;
+        }
+
+        // 隐藏空状态
+        if (emptyState) {
+            emptyState.style.display = 'none';
+        }
+        container.style.display = 'grid';
+
+        // 过滤公告
+        const filteredPosts = this.filterPostsByQuery(posts);
+
+        // 渲染公告
+        filteredPosts.forEach(post => {
+            const postElement = this.createPostElement(post);
+            container.appendChild(postElement);
+        });
+
+        // 如果过滤后没有结果，显示相应提示
+        if (filteredPosts.length === 0) {
+            const noResults = document.createElement('div');
+            noResults.className = 'no-results';
+            noResults.innerHTML = `
+                <div class="no-results-icon">🔍</div>
+                <h3>没有找到相关公告</h3>
+                <p>尝试更换搜索关键词或筛选条件</p>
+            `;
+            container.appendChild(noResults);
+        }
+    }
+
+    /**
+     * 根据搜索和筛选条件过滤公告
+     */
+    filterPostsByQuery(posts) {
+        if (!posts || posts.length === 0) return [];
+
+        let filtered = [...posts];
+
+        // 按筛选条件过滤
+        if (this.currentFilter && this.currentFilter !== 'all') {
+            filtered = filtered.filter(post => {
+                switch (this.currentFilter) {
+                    case 'today':
+                        const today = new Date().toDateString();
+                        const postDate = new Date(post.createdAt).toDateString();
+                        return today === postDate;
+                    case 'with-images':
+                        return post.images && post.images.length > 0;
+                    default:
+                        return true;
+                }
+            });
+        }
+
+        // 按搜索查询过滤
+        if (this.currentSearchQuery && this.currentSearchQuery.trim()) {
+            const query = this.currentSearchQuery.toLowerCase().trim();
+            filtered = filtered.filter(post => {
+                const title = (post.title || '').toLowerCase();
+                const content = this.getTextFromHTML(post.content || '').toLowerCase();
+                return title.includes(query) || content.includes(query);
+            });
+        }
+
+        // 按创建时间排序（最新的在前）
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        return filtered;
+    }
+
+    /**
      * 打开发布模态框
      */
     openPostModal(postId = null) {
@@ -334,36 +610,43 @@ class UIManager {
         this.selectedImages = [];
         
         // 重置表单
-        this.elements.postForm?.reset();
-        this.elements.imagePreview.innerHTML = '';
-        this.updateCharCount();
+        if (this.elements.postTitle) this.elements.postTitle.value = '';
+        if (this.elements.postContent) {
+            this.elements.postContent.innerHTML = '';
+            this.elements.postContent.style.lineHeight = '1.6';
+            this.elements.postContent.style.setProperty('--paragraph-spacing', '1em');
+        }
         
-        // 如果是编辑模式，填充数据
+        // 重置间距控制
+        const lineHeight = document.getElementById('lineHeight');
+        const paragraphSpacing = document.getElementById('paragraphSpacing');
+        const lineHeightValue = document.getElementById('lineHeightValue');
+        const paragraphSpacingValue = document.getElementById('paragraphSpacingValue');
+        
+        if (lineHeight) lineHeight.value = '1.6';
+        if (paragraphSpacing) paragraphSpacing.value = '1';
+        if (lineHeightValue) lineHeightValue.textContent = '1.6';
+        if (paragraphSpacingValue) paragraphSpacingValue.textContent = '1em';
+        
+        this.renderImagePreview();
+        
+        // 如果是编辑模式，加载现有数据
         if (postId) {
-            const post = AppStorage.getPostById(postId);
-            if (post) {
-                this.elements.postTitle.value = post.title || '';
-                this.elements.postContent.value = post.content || '';
-                this.selectedImages = [...(post.images || [])];
-                this.renderImagePreview();
-                this.updateCharCount();
-                
-                // 更改标题
-                const title = this.elements.postModal?.querySelector('h2');
-                if (title) {
-                    title.innerHTML = '<i class="fas fa-edit"></i> 编辑公告';
+            const currentStorage = window.CurrentStorage || window.AppStorage;
+            if (currentStorage && currentStorage.getPostById) {
+                const post = currentStorage.getPostById(postId);
+                if (post) {
+                    if (this.elements.postTitle) this.elements.postTitle.value = post.title || '';
+                    if (this.elements.postContent) this.elements.postContent.innerHTML = post.content || '';
+                    this.selectedImages = post.images || [];
+                    this.renderImagePreview();
                 }
-            }
-        } else {
-            // 新建模式
-            const title = this.elements.postModal?.querySelector('h2');
-            if (title) {
-                title.innerHTML = '<i class="fas fa-edit"></i> 发布新公告';
             }
         }
         
         Utils.DOM.show(this.elements.postModal);
         this.elements.postContent?.focus();
+        this.updateCharCount();
     }
 
     /**
@@ -373,48 +656,52 @@ class UIManager {
         Utils.DOM.hide(this.elements.postModal);
         this.currentEditingPost = null;
         this.selectedImages = [];
+        
+        // 隐藏间距面板
+        const spacingPanel = document.getElementById('spacingPanel');
+        if (spacingPanel) spacingPanel.style.display = 'none';
     }
 
     /**
      * 处理表单提交
      */
-    handleFormSubmit(e) {
+    async handleFormSubmit(e) {
         e.preventDefault();
         
-        const title = this.elements.postTitle?.value.trim();
-        const content = this.elements.postContent?.value.trim();
+        const title = this.elements.postTitle?.value?.trim();
+        const content = this.elements.postContent?.innerHTML?.trim();
         
-        // 验证内容
         if (!content) {
-            this.showToast('错误', '公告内容不能为空', 'error');
-            this.elements.postContent?.focus();
+            this.showToast('错误', '请输入公告内容', 'error');
             return;
         }
         
         const post = {
             title: title || null,
-            content: content,
-            images: [...this.selectedImages]
+            content,
+            images: this.selectedImages
         };
         
-        // 如果是编辑模式，添加ID
+        // 如果是编辑模式，保留ID
         if (this.currentEditingPost) {
             post.id = this.currentEditingPost;
         }
         
-        const savedPost = AppStorage.savePost(post);
-        
-        if (savedPost) {
-            this.showToast(
-                '成功', 
-                this.currentEditingPost ? '公告已更新' : '公告已发布', 
-                'success'
-            );
-            this.closePostModal();
-            this.updateStats();
-            this.renderPosts();
-        } else {
-            this.showToast('错误', '保存失败，请重试', 'error');
+        try {
+            const currentStorage = window.CurrentStorage || window.AppStorage;
+            const savedPost = await currentStorage.savePost(post);
+            
+            if (savedPost) {
+                this.showToast('成功', '公告发布成功', 'success');
+                this.closePostModal();
+                await this.updateStats();
+                await this.renderPosts();
+            } else {
+                throw new Error('保存失败');
+            }
+        } catch (error) {
+            console.error('保存公告失败:', error);
+            this.showToast('错误', '发布失败，请重试', 'error');
         }
     }
 
@@ -436,14 +723,22 @@ class UIManager {
     /**
      * 确认删除公告
      */
-    confirmDeletePost() {
+    async confirmDeletePost() {
         if (!this.postToDelete) return;
         
-        if (AppStorage.deletePost(this.postToDelete)) {
-            this.showToast('成功', '公告已删除', 'success');
-            this.updateStats();
-            this.renderPosts();
-        } else {
+        try {
+            const currentStorage = window.CurrentStorage || window.AppStorage;
+            const success = await currentStorage.deletePost(this.postToDelete);
+            
+            if (success) {
+                this.showToast('成功', '公告已删除', 'success');
+                await this.updateStats();
+                await this.renderPosts();
+            } else {
+                throw new Error('删除失败');
+            }
+        } catch (error) {
+            console.error('删除公告失败:', error);
             this.showToast('错误', '删除失败，请重试', 'error');
         }
         
@@ -462,7 +757,7 @@ class UIManager {
      * 更新字符计数
      */
     updateCharCount() {
-        const content = this.elements.postContent?.value || '';
+        const content = this.elements.postContent?.textContent || '';
         const count = content.length;
         const maxLength = 1000;
         
@@ -705,6 +1000,50 @@ class UIManager {
             } else if (e.key === 'ArrowRight') {
                 this.showNextImage();
             }
+        }
+    }
+
+    /**
+     * 更新存储引用（用于存储模式切换）
+     */
+    updateStorageReference(storage) {
+        // 存储引用通过全局变量管理，这里可以添加额外的处理逻辑
+        console.log('UI管理器已更新存储引用');
+    }
+
+    /**
+     * 搜索公告
+     */
+    async searchPosts() {
+        const query = this.elements.searchInput?.value?.trim();
+        
+        try {
+            const currentStorage = window.CurrentStorage || window.AppStorage;
+            
+            if (query) {
+                const results = await currentStorage.searchPosts(query);
+                this.displayPosts(results);
+                this.highlightSearchResults(query);
+            } else {
+                await this.renderPosts();
+            }
+        } catch (error) {
+            console.error('搜索失败:', error);
+            this.displayPosts([]);
+        }
+    }
+
+    /**
+     * 筛选公告
+     */
+    async filterPosts(filter) {
+        try {
+            const currentStorage = window.CurrentStorage || window.AppStorage;
+            const posts = await currentStorage.getPostsByFilter(filter);
+            this.displayPosts(posts);
+        } catch (error) {
+            console.error('筛选失败:', error);
+            this.displayPosts([]);
         }
     }
 }

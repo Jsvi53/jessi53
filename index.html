@@ -106,7 +106,7 @@
                     发布新公告
                 </h2>
                 <button class="close-btn" id="closeModal" title="关闭">
-                    <i class="fas fa-times"></i>
+                    <i class="fas fa-times"></i> 
                 </button>
             </div>
             <form class="post-form" id="postForm">
@@ -306,6 +306,8 @@
     <!-- JavaScript -->
     <script src="js/utils.js"></script>
     <script src="js/storage.js"></script>
+    <script src="js/api-storage.js"></script>
+    <script src="js/storage-manager.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/main.js"></script>
     
@@ -339,6 +341,7 @@
         console.log('脚本加载检查:');
         console.log('- Utils:', typeof window.Utils);
         console.log('- AppStorage:', typeof window.AppStorage);
+        console.log('- ApiStorage:', typeof window.ApiStorage);
         console.log('- UI:', typeof window.UI);
         console.log('- App:', typeof window.App);
     </script>

@@ -1,0 +1,24 @@
+{
+  "name": "announcement-board-backend",
+  "version": "1.0.0",
+  "description": "公告板后端API服务",
+  "main": "server/app.js",
+  "scripts": {
+    "start": "node server/app.js",
+    "dev": "nodemon server/app.js",
+    "init-db": "node server/init-db.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1",
+    "sqlite3": "^5.1.6",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["announcement", "board", "api"],
+  "author": "",
+  "license": "MIT"
+} 

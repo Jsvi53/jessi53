@@ -150,6 +150,20 @@ class AnnouncementBoard {
             }
         }
         
+        // 等待存储管理器初始化完成
+        if (window.StorageManager && !window.StorageManager.isInitialized) {
+            await new Promise(resolve => {
+                const checkInit = () => {
+                    if (window.StorageManager.isInitialized) {
+                        resolve();
+                    } else {
+                        setTimeout(checkInit, 50);
+                    }
+                };
+                checkInit();
+            });
+        }
+        
         // 等待UI模块完全初始化
         if (window.UI && !UI.isInitialized) {
             await new Promise(resolve => {
@@ -275,7 +289,8 @@ class AnnouncementBoard {
      * 加载示例数据（首次使用）
      */
     loadSampleDataIfNeeded() {
-        const stats = AppStorage.getStats();
+        const currentStorage = window.CurrentStorage || window.AppStorage;
+        const stats = currentStorage.getStats();
         
         if (stats.totalPosts === 0) {
             // 添加一些示例公告
@@ -293,7 +308,7 @@ class AnnouncementBoard {
             ];
 
             samplePosts.forEach(post => {
-                AppStorage.savePost(post);
+                currentStorage.savePost(post);
             });
 
             if (UI) {
@@ -316,7 +331,8 @@ class AnnouncementBoard {
      */
     exportData() {
         try {
-            const data = AppStorage.exportData();
+            const currentStorage = window.CurrentStorage || window.AppStorage;
+            const data = currentStorage.exportData();
             if (!data) {
                 throw new Error('没有可导出的数据');
             }
@@ -356,7 +372,8 @@ class AnnouncementBoard {
             
             try {
                 const text = await file.text();
-                const success = AppStorage.importData(text);
+                const currentStorage = window.CurrentStorage || window.AppStorage;
+                const success = await currentStorage.importData(text);
                 
                 if (success) {
                     UI.updateStats();
@@ -379,7 +396,8 @@ class AnnouncementBoard {
      */
     clearAllData() {
         if (confirm('确定要清空所有数据吗？此操作无法撤销。')) {
-            AppStorage.clearAllData();
+            const currentStorage = window.CurrentStorage || window.AppStorage;
+            currentStorage.clearAllData();
             UI.updateStats();
             UI.renderPosts();
             UI.showToast('数据已清空', '所有公告已被删除', 'success');
@@ -390,8 +408,9 @@ class AnnouncementBoard {
      * 获取应用信息
      */
     getAppInfo() {
-        const stats = AppStorage.getStats();
-        const storageInfo = AppStorage.getStorageInfo();
+        const currentStorage = window.CurrentStorage || window.AppStorage;
+        const stats = currentStorage.getStats();
+        const storageInfo = currentStorage.getStorageInfo();
         const deviceInfo = Utils.Browser.getDeviceInfo();
         
         return {
@@ -411,6 +430,7 @@ class AnnouncementBoard {
         console.log(`调试模式: ${this.debug ? '开启' : '关闭'}`);
         
         if (this.debug) {
+            const currentStorage = window.CurrentStorage || window.AppStorage;
             // 在调试模式下暴露一些有用的全局函数
             window.DEBUG = {
                 app: this,
@@ -418,7 +438,7 @@ class AnnouncementBoard {
                 importData: () => this.importData(),
                 clearData: () => this.clearAllData(),
                 getInfo: () => this.getAppInfo(),
-                storage: AppStorage,
+                storage: currentStorage,
                 ui: UI,
                 utils: Utils
             };
@@ -433,6 +453,8 @@ class AnnouncementBoard {
      * 应用健康检查
      */
     healthCheck() {
+        const currentStorage = window.CurrentStorage || window.AppStorage;
+        
         const checks = [
             {
                 name: '存储功能',
@@ -448,8 +470,11 @@ class AnnouncementBoard {
                 name: '数据完整性',
                 test: () => {
                     try {
-                        const data = AppStorage.getAllData();
-                        return data && typeof data === 'object';
+                        if (currentStorage.getAllData) {
+                            const data = currentStorage.getAllData();
+                            return data && typeof data === 'object';
+                        }
+                        return true; // API模式下跳过此检查
                     } catch {
                         return false;
                     }

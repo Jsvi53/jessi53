@@ -1628,4 +1628,274 @@ textarea:focus-visible {
         right: 0.5rem;
         max-width: none;
     }
+}
+
+/* 富文本内容样式 */
+.rich-content {
+    line-height: 1.6;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.rich-content p {
+    margin: 0 0 1em 0;
+}
+
+.rich-content p:last-child {
+    margin-bottom: 0;
+}
+
+.rich-content h1,
+.rich-content h2,
+.rich-content h3,
+.rich-content h4,
+.rich-content h5,
+.rich-content h6 {
+    margin: 1.5em 0 0.5em 0;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.rich-content h1:first-child,
+.rich-content h2:first-child,
+.rich-content h3:first-child,
+.rich-content h4:first-child,
+.rich-content h5:first-child,
+.rich-content h6:first-child {
+    margin-top: 0;
+}
+
+.rich-content strong,
+.rich-content b {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.rich-content em,
+.rich-content i {
+    font-style: italic;
+}
+
+.rich-content u {
+    text-decoration: underline;
+}
+
+.rich-content s,
+.rich-content strike {
+    text-decoration: line-through;
+}
+
+.rich-content ul,
+.rich-content ol {
+    margin: 1em 0;
+    padding-left: 2em;
+}
+
+.rich-content li {
+    margin: 0.5em 0;
+}
+
+.rich-content blockquote {
+    margin: 1em 0;
+    padding: 1em;
+    border-left: 4px solid var(--primary-color);
+    background: var(--background-color);
+    font-style: italic;
+}
+
+.rich-content code {
+    font-family: 'Courier New', Courier, monospace;
+    background: var(--background-color);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+.rich-content pre {
+    background: var(--background-color);
+    padding: 1em;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 1em 0;
+}
+
+.rich-content pre code {
+    background: none;
+    padding: 0;
+}
+
+.rich-content a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.rich-content a:hover {
+    text-decoration: underline;
+}
+
+.rich-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    margin: 0.5em 0;
+}
+
+.rich-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+}
+
+.rich-content th,
+.rich-content td {
+    border: 1px solid var(--border-color);
+    padding: 0.5em;
+    text-align: left;
+}
+
+.rich-content th {
+    background: var(--background-color);
+    font-weight: 600;
+}
+
+.rich-content hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 2em 0;
+}
+
+/* 富文本编辑器专用样式 */
+.rich-editor {
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-background);
+    line-height: 1.6;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.rich-editor:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.rich-editor:empty::before {
+    content: attr(data-placeholder);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.rich-editor p {
+    margin: 0 0 var(--paragraph-spacing, 1em) 0;
+}
+
+.rich-editor p:last-child {
+    margin-bottom: 0;
+}
+
+.rich-editor br {
+    line-height: normal;
+}
+
+/* 工具栏按钮激活状态 */
+.toolbar-btn.active {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+/* 间距面板样式 */
+.spacing-panel {
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.spacing-control {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.spacing-control:last-child {
+    margin-bottom: 0;
+}
+
+.spacing-control label {
+    min-width: 80px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.spacing-control input[type="range"] {
+    flex: 1;
+    margin: 0;
+}
+
+.spacing-control span {
+    min-width: 40px;
+    text-align: right;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .rich-editor {
+        min-height: 150px;
+        max-height: 300px;
+        font-size: 14px;
+    }
+    
+    .spacing-control {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    
+    .spacing-control label {
+        min-width: auto;
+    }
+    
+    .spacing-control span {
+        text-align: left;
+    }
+}
+
+/* 无搜索结果提示 */
+.no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-secondary);
+}
+
+.no-results-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.no-results h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.no-results p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
 } 

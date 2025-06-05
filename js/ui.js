@@ -186,9 +186,23 @@ class UIManager {
      * 初始化主题
      */
     initTheme() {
-        const currentStorage = window.CurrentStorage || window.AppStorage;
-        const savedTheme = currentStorage.getSettings().theme;
-        this.setTheme(savedTheme);
+        try {
+            const currentStorage = window.CurrentStorage || window.AppStorage;
+            
+            if (!currentStorage || typeof currentStorage.getSettings !== 'function') {
+                // 如果存储不可用，使用默认主题
+                console.warn('存储系统不可用，使用默认主题');
+                this.setTheme('light');
+                return;
+            }
+
+            const savedTheme = currentStorage.getSettings().theme || 'light';
+            this.setTheme(savedTheme);
+        } catch (error) {
+            console.error('初始化主题失败:', error);
+            // 出错时使用默认主题
+            this.setTheme('light');
+        }
     }
 
     /**
@@ -316,27 +330,97 @@ class UIManager {
      * 切换主题
      */
     toggleTheme() {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        this.setTheme(newTheme);
+        try {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            this.setTheme(newTheme);
+        } catch (error) {
+            console.error('主题切换失败:', error);
+            
+            // 尝试恢复到默认主题
+            this.recoverTheme();
+            
+            // 显示错误消息
+            this.showToast('主题切换', '主题切换遇到问题，已恢复到默认主题', 'warning');
+        }
+    }
+
+    /**
+     * 恢复主题到默认状态
+     */
+    recoverTheme() {
+        try {
+            // 强制设置为亮色主题
+            document.documentElement.setAttribute('data-theme', 'light');
+            
+            const icon = this.elements.themeToggle?.querySelector('i');
+            if (icon) {
+                icon.className = 'fas fa-moon';
+            }
+            
+            console.log('✅ 主题已恢复到默认状态');
+        } catch (error) {
+            console.error('主题恢复失败:', error);
+        }
     }
 
     /**
      * 设置主题
      */
     setTheme(theme = 'light') {
-        document.documentElement.setAttribute('data-theme', theme);
-        
-        const icon = this.elements.themeToggle?.querySelector('i');
-        if (icon) {
-            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        try {
+            document.documentElement.setAttribute('data-theme', theme);
+            
+            const icon = this.elements.themeToggle?.querySelector('i');
+            if (icon) {
+                icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+            
+            // 保存主题设置，添加错误处理
+            this.saveThemeSettings(theme);
+        } catch (error) {
+            console.error('设置主题时发生错误:', error);
+            // 即使保存失败，至少确保DOM主题已更新
+            document.documentElement.setAttribute('data-theme', theme);
+            
+            const icon = this.elements.themeToggle?.querySelector('i');
+            if (icon) {
+                icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+            
+            // 显示友好的错误消息
+            this.showToast('提示', '主题切换成功，但设置保存失败', 'warning');
         }
-        
-        // 保存主题设置
-        const currentStorage = window.CurrentStorage || window.AppStorage;
-        const settings = currentStorage.getSettings();
-        settings.theme = theme;
-        currentStorage.saveSettings(settings);
+    }
+
+    /**
+     * 安全地保存主题设置
+     */
+    async saveThemeSettings(theme) {
+        try {
+            const currentStorage = window.CurrentStorage || window.AppStorage;
+            
+            if (!currentStorage) {
+                console.warn('存储系统未初始化，主题设置无法保存');
+                return;
+            }
+
+            // 检查存储系统是否有必要的方法
+            if (typeof currentStorage.getSettings !== 'function' || 
+                typeof currentStorage.saveSettings !== 'function') {
+                console.warn('存储系统缺少必要的方法');
+                return;
+            }
+
+            const settings = await currentStorage.getSettings();
+            settings.theme = theme;
+            await currentStorage.saveSettings(settings);
+            
+            console.log('✅ 主题设置已保存:', theme);
+        } catch (error) {
+            // 安静地处理保存错误，不影响用户体验
+            console.warn('保存主题设置失败:', error);
+        }
     }
 
     /**
@@ -942,6 +1026,7 @@ class UIManager {
         
         const icon = type === 'success' ? 'fa-check-circle' : 
                     type === 'error' ? 'fa-exclamation-circle' : 
+                    type === 'warning' ? 'fa-exclamation-triangle' :
                     'fa-info-circle';
         
         toast.innerHTML = `

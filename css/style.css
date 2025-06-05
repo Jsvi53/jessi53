@@ -890,6 +890,14 @@ body {
     color: var(--danger-color);
 }
 
+.toast.warning {
+    border-left: 4px solid var(--warning-color);
+}
+
+.toast.warning .toast-icon {
+    color: var(--warning-color);
+}
+
 .toast-content {
     flex: 1;
 }

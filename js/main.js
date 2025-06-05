@@ -1,5 +1,5 @@
 /**
- * 公告板主应用程序
+ * 现代公告板主应用
  */
 
 class AnnouncementBoard {
@@ -52,6 +52,9 @@ class AnnouncementBoard {
             this.hideLoadingScreen();
             
             console.log(`📢 公告板应用已启动 v${this.version}`);
+            
+            // 显示调试信息和快捷键
+            this.showStartupInfo();
             
         } catch (error) {
             console.error('应用初始化失败:', error);
@@ -201,12 +204,14 @@ class AnnouncementBoard {
 
         // 全局错误处理
         window.addEventListener('error', (e) => this.onGlobalError(e));
+        
+        // 未处理的Promise拒绝
         window.addEventListener('unhandledrejection', (e) => this.onUnhandledRejection(e));
 
         // 窗口大小变化
-        window.addEventListener('resize', Utils.DOM.throttle(() => {
-            this.onWindowResize();
-        }, 250));
+        window.addEventListener('resize', () => this.onWindowResize());
+
+        console.log('✅ 全局事件监听已设置');
     }
 
     /**
@@ -264,8 +269,22 @@ class AnnouncementBoard {
     onGlobalError(e) {
         console.error('全局错误:', e.error);
         
-        if (UI) {
-            UI.showToast('系统错误', '发生了一个错误，但应用仍在运行', 'error');
+        // 阻止错误冒泡到浏览器默认处理
+        e.preventDefault();
+        
+        if (window.UI && typeof window.UI.showToast === 'function') {
+            // 根据错误类型显示不同的消息
+            let message = '发生了一个错误，但应用仍在运行';
+            
+            if (e.error && e.error.message) {
+                if (e.error.message.includes('storage') || e.error.message.includes('存储')) {
+                    message = '存储系统暂时不可用，某些设置可能无法保存';
+                } else if (e.error.message.includes('theme') || e.error.message.includes('主题')) {
+                    message = '主题切换时出现问题，但功能正常';
+                }
+            }
+            
+            window.UI.showToast('系统提示', message, 'warning');
         }
     }
 
@@ -275,6 +294,20 @@ class AnnouncementBoard {
     onUnhandledRejection(e) {
         console.error('未处理的 Promise 拒绝:', e.reason);
         e.preventDefault();
+        
+        if (window.UI && typeof window.UI.showToast === 'function') {
+            let message = '网络请求失败，请检查网络连接';
+            
+            if (e.reason && e.reason.message) {
+                if (e.reason.message.includes('fetch') || e.reason.message.includes('network')) {
+                    message = '网络请求失败，请检查网络连接';
+                } else if (e.reason.message.includes('storage') || e.reason.message.includes('存储')) {
+                    message = '数据保存失败，请稍后重试';
+                }
+            }
+            
+            window.UI.showToast('网络提示', message, 'warning');
+        }
     }
 
     /**
@@ -498,6 +531,41 @@ class AnnouncementBoard {
             console.warn('⚠️  发现问题:', failed);
             return { healthy: false, results, issues: failed };
         }
+    }
+
+    /**
+     * 显示调试信息和快捷键
+     */
+    showStartupInfo() {
+        // 在控制台显示有用的信息
+        console.log(`%c🎉 公告板已启动！`, 'color: #6366f1; font-weight: bold; font-size: 16px;');
+        console.log('%c快捷键提示:', 'color: #10b981; font-weight: bold;');
+        console.log('  • Ctrl/Cmd + N: 新建公告');
+        console.log('  • ESC: 关闭模态框');
+        console.log('  • F12: 打开开发者工具');
+        
+        const storageInfo = window.StorageManager?.getStorageInfo();
+        if (storageInfo) {
+            console.log(`%c存储模式: ${storageInfo.mode}`, 'color: #f59e0b;');
+        }
+        
+        // 检查是否有错误
+        const errorCount = this.getErrorCount();
+        if (errorCount > 0) {
+            console.log(`%c⚠️ 检测到 ${errorCount} 个初始化警告`, 'color: #ef4444;');
+        } else {
+            console.log('%c✅ 所有系统正常', 'color: #10b981;');
+        }
+        
+        console.log('%c输入 DEBUG.getInfo() 查看详细信息', 'color: #6b7280; font-style: italic;');
+    }
+
+    /**
+     * 获取错误计数（简单实现）
+     */
+    getErrorCount() {
+        // 这里可以实现更复杂的错误统计逻辑
+        return 0;
     }
 }
 

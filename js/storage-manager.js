@@ -18,20 +18,39 @@ class StorageManager {
         
         console.log('🔄 初始化存储管理器...');
         
-        // 默认尝试使用数据库存储
-        const success = await this.tryDatabaseStorage();
-        
-        if (!success) {
-            // 如果数据库不可用，使用本地存储
-            this.useLocalStorage();
+        try {
+            // 默认尝试使用数据库存储
+            const success = await this.tryDatabaseStorage();
+            
+            if (!success) {
+                // 如果数据库不可用，使用本地存储
+                this.useLocalStorage();
+            }
+
+            // 设置全局存储引用
+            window.CurrentStorage = this.storage;
+            this.isInitialized = true;
+            this.isInitializing = false;
+
+            console.log(`✅ 存储管理器初始化完成，当前模式：${this.isApiMode ? 'API数据库' : '本地存储'}`);
+            
+        } catch (error) {
+            console.error('❌ 存储管理器初始化失败:', error);
+            
+            // 尝试回退到最基础的本地存储
+            try {
+                this.useLocalStorage();
+                window.CurrentStorage = this.storage;
+                this.isInitialized = true;
+                console.log('🔄 已回退到本地存储模式');
+            } catch (fallbackError) {
+                console.error('❌ 本地存储也初始化失败:', fallbackError);
+                // 即使存储完全失败，也要设置标志避免无限等待
+                this.isInitialized = true;
+            }
+            
+            this.isInitializing = false;
         }
-
-        // 设置全局存储引用
-        window.CurrentStorage = this.storage;
-        this.isInitialized = true;
-        this.isInitializing = false;
-
-        console.log(`✅ 存储管理器初始化完成，当前模式：${this.isApiMode ? 'API数据库' : '本地存储'}`);
     }
 
     async tryDatabaseStorage() {

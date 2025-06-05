@@ -300,8 +300,22 @@
         </div>
     </div>
 
-    <!-- Toast 通知 -->
-    <div class="toast-container" id="toastContainer"></div>
+    <!-- 调试信息面板（仅在开发模式下显示） -->
+    <div id="debugPanel" class="debug-panel" style="display: none;">
+        <h4>🔧 调试信息</h4>
+        <div class="debug-info">
+            <strong>存储状态:</strong> <span id="debugStorage">检查中...</span>
+        </div>
+        <div class="debug-info">
+            <strong>UI状态:</strong> <span id="debugUI">检查中...</span>
+        </div>
+        <div class="debug-info">
+            <strong>主题:</strong> <span id="debugTheme">检查中...</span>
+        </div>
+    </div>
+
+    <!-- Toast通知容器 -->
+    <div id="toastContainer" class="toast-container"></div>
 
     <!-- JavaScript -->
     <script src="js/utils.js"></script>
